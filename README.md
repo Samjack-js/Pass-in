@@ -2,7 +2,6 @@
 
 Projeto construído durante Imersão da NLW Unite de Node.js da Rocketseat com o objetivo de desenvolver um sistema de gestão de participantes em eventos.
 
-[🔗 Clique aqui para acessar](https://my-resume-bamarcheti.vercel.app/)
 
 ## **🛠 Tecnologias**
 
