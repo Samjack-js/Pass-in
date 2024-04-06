@@ -2,16 +2,29 @@ import { FastifyInstance } from "fastify";
 import { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
+import { badRequest } from "./_errors/bad-request";
 
 export async function getAttendeBadge(app: FastifyInstance) {
     app
     .withTypeProvider<ZodTypeProvider>()
     .get('/attendees/:attendeeId/badge', {
         schema: {
+            summary: 'Get attendee badge',
+            tags: ['attendees'],
             params: z.object ({
                 attendeeId: z.coerce.number().int(),
             }),
-            response: {},
+            response: {
+
+                200: z.object({
+                    badge: z.object({
+                        name: z.string(),
+                        email: z.string().email(),
+                        evenetTitle: z.string(),
+                        checkInURL: z.string().url(),
+                    })
+                })
+            },
         }
     }, async (request, reply) => {
 
@@ -33,10 +46,21 @@ export async function getAttendeBadge(app: FastifyInstance) {
         })
 
         if (attendee === null) {
-            throw new Error('Attendee not found')
+            throw new badRequest('Attendee not found')
         }
+
+        const baseURL =  `${request.protocol}://${request.hostname}`
+
+        const checkInURL = new URL(`/attendees/${attendeeId}/check-in`, baseURL)
         
-        return reply.send({attendee})
+        return reply.send({
+            badge: {
+                name: attendee.name,
+                email: attendee.email,
+                evenetTitle: attendee.event.title,
+                checkInURL: checkInURL.toString()
+            }
+        })
 
     })
 }
